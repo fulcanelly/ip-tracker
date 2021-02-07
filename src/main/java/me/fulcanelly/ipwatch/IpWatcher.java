@@ -1,17 +1,17 @@
-// 
-// Decompiled by Procyon v0.5.32
-// 
 
 package me.fulcanelly.ipwatch;
 
 import org.bukkit.event.server.ServerListPingEvent;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import me.fulcanelly.clsql.async.tasks.AsyncTask;
 import me.fulcanelly.clsql.container.VirtualConsumer;
 import me.fulcanelly.clsql.databse.SQLQueryHandler;
+import me.fulcanelly.clsql.container.Pair;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,47 +21,6 @@ import java.util.*;
 import lombok.SneakyThrows;
 import me.fulcanelly.ipwatch.utils.*;
 
-/*
-tables 
-CREATE TABLE IF NOT EXISTS ips(
-    STRING ip;
-    INTEGER count;
-);
-
-CREATE TABLE IF NOT EXISTS names(
-    STRING ip;
-    STRING nick;
-);
-*/
-
-class IpDatabase {
-
-    static public List<String> empty = List.of();
-
-    @Deprecated
-    public List<String> getNamesByIp(String ip) {
-        return empty;
-    }
-
-    @Deprecated
-    public int getHowManyPingsGot(String ip) {
-        return 0;
-    }
-
-    @Deprecated
-    void addNameByIp(String ip, String name) {
-
-    }
-
-    @Deprecated
-    void incOrCreatePingCount(String ip) {
-
-    }
-    void setName(String ip, String name) {
-
-    }
-
-}
 
 class AsyncIpBase {
 
@@ -105,8 +64,6 @@ class IpPingCount {
 }
 
 public class IpWatcher extends JavaPlugin implements Listener {
-
-    IpDatabase ipdb;
 
     @EventHandler
     void onPlayerPing(ServerListPingEvent event) {
@@ -239,9 +196,4 @@ public class IpWatcher extends JavaPlugin implements Listener {
 
     }
 
-    public static void main(String[] args) {
-        var iwatcher = new IpWatcher();
-        iwatcher.onEnable();
-        iwatcher.onServerPing();
-    }
 }
