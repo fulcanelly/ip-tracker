@@ -208,6 +208,24 @@ public class IpWatcher extends JavaPlugin implements Listener {
 
     AsyncIpBase database;
 
+
+    void initTables() {
+            
+        sql.execute(
+            "CREATE TABLE IF NOT EXISTS ips(" +
+            "   STRING ip,".trim() +
+            "   INTEGER count".trim() +
+            ")"
+        );
+        sql.execute(
+            "CREATE TABLE IF NOT EXISTS names(" +
+            "    STRING ip,".trim() +
+            "    STRING nick".trim() +
+            ")"
+        );
+
+    }
+    
     public void onEnable() {
         
         try { 
