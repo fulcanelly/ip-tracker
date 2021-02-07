@@ -225,29 +225,16 @@ public class IpWatcher extends JavaPlugin implements Listener {
         );
 
     }
-    
-    public void onEnable() {
-        
-        try { 
-            var directory = this.getDataFolder();
-            if (!directory.exists()) {
-                directory.mkdir();
-            }
 
-            var sqlite = new SQLQueryHandler(
-                new ConnectionProvider(this).getConnection()
-            );
-            
-            sqlite.execute(
-                "CREATE TABLE IF NOT EXISTS ips(" +
-                "   STRING ip," +
-                "   INTEGER count" +
-                ")"
-            );
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-       // database = new AsyncIpBase(sqlite);
+    public void onEnable() {
+
+        this.getDataFolder().mkdir();
+        
+        sql = new SQLQueryHandler(
+            new ConnectionProvider(this).getConnection()
+        );
+
+        initTables();
         regListeners(this);
 
     }
