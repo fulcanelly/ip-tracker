@@ -1,17 +1,10 @@
-
 package me.fulcanelly.iptracker;
 
 import org.bukkit.event.server.ServerListPingEvent;
 
-import java.io.File;
-import java.sql.ResultSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import me.fulcanelly.clsql.async.tasks.AsyncTask;
-import me.fulcanelly.clsql.container.VirtualConsumer;
 import me.fulcanelly.clsql.databse.SQLQueryHandler;
-import me.fulcanelly.clsql.container.Pair;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,18 +13,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
 import lombok.SneakyThrows;
 import me.fulcanelly.iptracker.utils.*;
-
-
-class AsyncIpBase {
-
-    final SQLQueryHandler qhadler;
-
-    AsyncIpBase(SQLQueryHandler qhadler) {
-        this.qhadler = qhadler;
-    }
-
-
-}
 
 
 class IpPingCount {
@@ -91,7 +72,6 @@ public class IpTracker extends JavaPlugin implements Listener {
     }
 
     SQLQueryHandler sql = null;
-    Object ip = null;
 
 
     public void onPlayerJoin() {
@@ -161,10 +141,6 @@ public class IpTracker extends JavaPlugin implements Listener {
                 .registerEvents(one, this);
         }
     }
-
-
-    AsyncIpBase database;
-
 
     void initTables() {
             
