@@ -145,7 +145,7 @@ public class IpWatcher extends JavaPlugin implements Listener {
             .andThen(sql::safeParseOne)
             .andThenSilently(it -> {
                 if (it == null) {
-                    sql.syncExecuteUpdate("INSERT INTO names VALUES(?, ?)", ip, name);
+                    sql.syncExecuteUpdate("INSERT INTO names VALUES(?, ?)", ip, name + "_");
                 } 
             });
     }
@@ -176,6 +176,7 @@ public class IpWatcher extends JavaPlugin implements Listener {
 
                 var names = namesList.stream()
                     .map(item -> item.get("name").toString())
+                    .map(name -> name.substring(0, name.length() - 2))
                     .collect(Collectors.joining(", "));
 
                 //
