@@ -130,9 +130,30 @@ public class IpTracker extends JavaPlugin implements Listener {
 
                 ipcount.updateIn(sql);
             });
-            
-            
     }
+
+    @EventHandler
+    void onJoin(PlayerJoinEvent event) {
+        
+        var player = event.getPlayer();
+        var name = player.getName();
+
+        var ip = player
+            .getAddress()
+            .getAddress()
+            .toString();
+        
+        sql.executeQuery("SELECT * FROM names WHERE ip = ? AND nick = ?", ip, name)
+            .andThen(sql::safeParseOne)
+            .andThenSilently(it -> {
+                if (it == null) {
+                    sql.syncExecuteUpdate("INSERT INTO names VALUES(?, ?)", ip, name + "_");
+                } 
+            });
+        
+    }
+
+    SQLQueryHandler sql = null;
 
     void regListeners(Listener ...listeners) {
         for (var one : listeners) {
