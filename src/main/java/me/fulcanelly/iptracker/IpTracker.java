@@ -129,14 +129,14 @@ public class IpTracker extends JavaPlugin implements Listener {
             
         sql.execute(
             "CREATE TABLE IF NOT EXISTS ips(" +
-            "   STRING ip,".trim() +
-            "   INTEGER count".trim() +
+            "   ip STRING,".trim() +
+            "   count INTEGER".trim() +
             ")"
         );
         sql.execute(
             "CREATE TABLE IF NOT EXISTS names(" +
-            "    STRING ip,".trim() +
-            "    STRING nick".trim() +
+            "    ip STRING,".trim() +
+            "    nick STRING".trim() +
             ")"
         );
 
