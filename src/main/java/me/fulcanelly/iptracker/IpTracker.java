@@ -53,44 +53,6 @@ public class IpTracker extends JavaPlugin implements Listener {
             .getAddress()
             .toString();
     
-        getLogger().info("ping from " + ip);
-    }
-
-    @EventHandler
-    void onJoin(PlayerJoinEvent event) {
-        
-        var player = event
-            .getPlayer();
-
-        var ip = player
-            .getAddress()
-            .getAddress()
-            .toString();
-        
-        getLogger().info("join " + ip);
-        
-    }
-
-    SQLQueryHandler sql = null;
-
-
-    public void onPlayerJoin() {
-        String ip = null;
-        String name = null;
-
-        sql.executeQuery("SELECT * FROM names WHERE ip = ? AND nick = ?", ip, name)
-            .andThen(sql::safeParseOne)
-            .andThenSilently(it -> {
-                if (it == null) {
-                    sql.syncExecuteUpdate("INSERT INTO names VALUES(?, ?)", ip, name + "_");
-                } 
-            });
-    }
-
-    public void onServerPing() {
-        String ip = "null";
-        
-
         sql.executeQuery("SELECT * FROM ips WHERE ip = ?", ip)
             .andThen(sql::safeParseOne)
             .andThen(map -> { 
