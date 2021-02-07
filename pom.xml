@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.fulcanelly</groupId>
-    <artifactId>ip-watcher</artifactId>
+    <artifactId>ip-tracker</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
 
-    <name>ip-watcher</name>
+    <name>ip-tracker</name>
     <description>Watches pings and tries to say who them belongs to</description>
 
     <licenses>
@@ -24,7 +24,7 @@
 
     <properties>
         <author>fulcanelly</author>
-        <mainClass>me.fulcanelly.ipwatch.IpWatcher</mainClass>
+        <mainClass>me.fulcanelly.iptracker.IpTracker</mainClass>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

@@ -2,7 +2,7 @@
 // Decompiled by Procyon v0.5.32
 // 
 
-package me.fulcanelly.ipwatch;
+package me.fulcanelly.iptracker;
 
 import org.bukkit.event.server.ServerListPingEvent;
 
@@ -19,7 +19,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
 import lombok.SneakyThrows;
-import me.fulcanelly.ipwatch.utils.*;
+import me.fulcanelly.iptracker.utils.*;
 
 /*
 tables 
@@ -104,7 +104,7 @@ class IpPingCount {
     }
 }
 
-public class IpWatcher extends JavaPlugin implements Listener {
+public class IpTracker extends JavaPlugin implements Listener {
 
     IpDatabase ipdb;
 
