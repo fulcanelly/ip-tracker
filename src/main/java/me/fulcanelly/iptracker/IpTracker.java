@@ -31,7 +31,7 @@ class IpPingCount {
     }
 
     void updateIn(SQLQueryHandler db) {
-        db.syncExecuteUpdate("UPDATE names SET ip = ?, count = ?", ip, count);
+        db.syncExecuteUpdate("UPDATE ips SET ip = ?, count = ? WHERE ip = ?", ip, count, ip);
     }
 
     static IpPingCount of(Map<String, Object> map) {
@@ -55,14 +55,14 @@ public class IpTracker extends JavaPlugin implements Listener {
     
         sql.executeQuery("SELECT * FROM ips WHERE ip = ?", ip)
             .andThen(sql::safeParseOne)
-            .andThen(map -> { 
+            .andThen(optMap -> { 
                 
-                if (map == null) {
+                if (optMap.isEmpty()) {
                     var ipcount = new IpPingCount(ip);
                     ipcount.createIn(sql);
                     return ipcount;
                 } else {
-                    return IpPingCount.of(map);
+                    return IpPingCount.of(optMap.get());
                 }
         
             })
@@ -72,10 +72,10 @@ public class IpTracker extends JavaPlugin implements Listener {
                 var namesList = sql.parseListOf(
                     sql.syncExecuteQuery("SELECT * FROM names WHERE ip = ?", ip)
                 );
-
+              
                 var names = namesList.stream()
-                    .map(item -> item.get("name").toString())
-                    .map(name -> name.substring(0, name.length() - 2))
+                    .map(item -> item.get("nick").toString())
+                    .map(name -> name.substring(0, name.length() - 1))
                     .collect(Collectors.joining(", "));
 
                 //
@@ -105,10 +105,10 @@ public class IpTracker extends JavaPlugin implements Listener {
             .getAddress()
             .toString();
         
-        sql.executeQuery("SELECT * FROM names WHERE ip = ? AND nick = ?", ip, name)
+        sql.executeQuery("SELECT * FROM names WHERE ip = ? AND nick = ?", ip, name + "_") //fix 
             .andThen(sql::safeParseOne)
             .andThenSilently(it -> {
-                if (it == null) {
+                if (it.isEmpty()) {
                     sql.syncExecuteUpdate("INSERT INTO names VALUES(?, ?)", ip, name + "_");
                 } 
             });
