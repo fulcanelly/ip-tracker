@@ -4,14 +4,22 @@ import org.bukkit.event.server.ServerListPingEvent;
 
 import java.util.stream.Collectors;
 
+import com.google.common.base.Supplier;
+
 import me.fulcanelly.clsql.databse.SQLQueryHandler;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
-import lombok.SneakyThrows;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import me.fulcanelly.iptracker.utils.*;
 
 
@@ -46,13 +54,49 @@ class IpPingCount {
 
 public class IpTracker extends JavaPlugin implements Listener {
 
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    @EventHandler
+    void onMove(PlayerMoveEvent event) {
+        var loc = event.getPlayer().getLocation();
+
+        var yaw = loc.getYaw();
+        var pitch = loc.getPitch();
+        var time = System.currentTimeMillis();
+        var nick = event.getPlayer().getName();
+
+        executor.execute(() -> {
+            sql.syncExecuteUpdate("INSERT INTO angles VALUES(?, ?, ?, ?)", yaw, pitch, time, nick);
+        });
+    }
+
+    void insertConnectionAction(String action, PlayerEvent event) {
+        var time = System.currentTimeMillis();
+
+        executor.execute(() -> {
+            sql.syncExecuteUpdate(
+                "INSERT INTO connections VALUES(?, ?, ?)", action, time, event.getPlayer().getName()
+            );
+        });
+    }
+
+    @EventHandler
+    void onLogin(PlayerJoinEvent event) {
+        insertConnectionAction("join", event);
+    }
+
+    @EventHandler
+    void onLeave(PlayerQuitEvent event) {
+        insertConnectionAction("quit", event);
+    }
+
     @EventHandler
     void onPlayerPing(ServerListPingEvent event) {
         
         var ip = event
             .getAddress()
             .toString();
-    
+
         sql.executeQuery("SELECT * FROM ips WHERE ip = ?", ip)
             .andThen(sql::safeParseOne)
             .andThen(optMap -> { 
@@ -129,19 +173,36 @@ public class IpTracker extends JavaPlugin implements Listener {
             
         sql.execute(
             "CREATE TABLE IF NOT EXISTS ips(" +
-            "   ip STRING,".trim() +
-            "   count INTEGER".trim() +
+            "   ip STRING," +
+            "   count INTEGER" +
             ")"
         );
         sql.execute(
             "CREATE TABLE IF NOT EXISTS names(" +
-            "    ip STRING,".trim() +
-            "    nick STRING".trim() +
+            "    ip STRING," +
+            "    nick STRING" +
             ")"
         );
 
+        sql.execute(
+            "CREATE TABLE IF NOT EXISTS connections(" +
+            "    action STRING," +  //join or leave
+            "    time INTEGER," +
+            "    nick STRING" +
+            ")"
+        );
+
+        sql.execute(
+            "CREATE TABLE IF NOT EXISTS angles(" +
+            "    yaw INTEGER," +
+            "    pitch INTEGER," +
+            "    time INTEGER,"  +
+            "    nick STRING" +
+            ")"
+        );
     }
 
+    @Override
     public void onEnable() {
 
         this.getDataFolder().mkdir();
@@ -155,4 +216,8 @@ public class IpTracker extends JavaPlugin implements Listener {
 
     }
 
+    @Override
+    public void onDisable() {
+        executor.shutdownNow();
+    }
 }
