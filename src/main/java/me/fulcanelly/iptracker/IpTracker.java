@@ -208,7 +208,7 @@ public class IpTracker extends JavaPlugin implements Listener {
         this.getDataFolder().mkdir();
         
         sql = new SQLQueryHandler(
-            new ConnectionProvider(this).getConnection()
+            new ConnectionProvider(this).getConnection(), false
         );
 
         initTables();
