@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import me.fulcanelly.iptracker.utils.*;
 
@@ -52,12 +53,39 @@ class IpPingCount {
     }
 }
 
+
+class LastWritenAngle {
+
+    Float yaw;
+    Float pitch;
+
+    public boolean isSame(Float yaw, Float pitch) {
+        return pitch.equals(this.pitch) && yaw.equals(this.yaw);
+    }
+
+    public void update(Float yaw, Float pitch) {
+        this.yaw = yaw;
+        this.pitch = pitch;
+    }
+
+    public LastWritenAngle(Float yaw, Float pitch) {
+        this.yaw = yaw;
+        this.pitch = pitch;
+    }
+    
+}
+
+
+
 public class IpTracker extends JavaPlugin implements Listener {
 
+
+    Map<String, LastWritenAngle> angleCache = new HashMap<>();
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @EventHandler
     void onMove(PlayerMoveEvent event) {
+
         var loc = event.getPlayer().getLocation();
 
         var yaw = loc.getYaw();
@@ -66,7 +94,17 @@ public class IpTracker extends JavaPlugin implements Listener {
         var nick = event.getPlayer().getName();
 
         executor.execute(() -> {
-            sql.syncExecuteUpdate("INSERT INTO angles VALUES(?, ?, ?, ?)", yaw, pitch, time, nick);
+
+            var last = angleCache.putIfAbsent(nick, new LastWritenAngle(yaw, pitch));
+
+            if (last.isSame(yaw, pitch)) {
+                return;
+            } else {
+                last.update(yaw, pitch);
+                sql.syncExecuteUpdate("INSERT INTO angles VALUES(?, ?, ?, ?)", yaw, pitch, time, nick);
+            }
+
+            
         });
     }
 
