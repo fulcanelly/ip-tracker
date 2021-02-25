@@ -79,12 +79,27 @@ class LastWritenAngle {
 
 public class IpTracker extends JavaPlugin implements Listener {
 
-
     Map<String, LastWritenAngle> angleCache = new HashMap<>();
+
     ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    int findOrCreatePlayerIndex(String nick) {
+        var result = sql.safeParseOne(
+            sql.syncExecuteQuery("SELECT * FROM players WHERE nick = ?", nick)
+        );
+
+        return result.map(hash -> (int)hash.get("id")).orElseGet(() -> {
+            sql.syncExecuteUpdate("INSERT INTO players(nick) VALUES(?)", nick);
+            return findOrCreatePlayerIndex(nick);
+        });
+    }
 
     @EventHandler
     void onMove(PlayerMoveEvent event) {
+
+        if (event.isCancelled()) {
+            return;
+        }
 
         var loc = event.getPlayer().getLocation();
 
@@ -95,13 +110,15 @@ public class IpTracker extends JavaPlugin implements Listener {
 
         executor.execute(() -> {
 
-            var last = angleCache.putIfAbsent(nick, new LastWritenAngle(yaw, pitch));
+            var last = angleCache.get(nick);
 
-            if (last.isSame(yaw, pitch)) {
+            if (last != null && last.isSame(yaw, pitch)) {
                 return;
             } else {
-                last.update(yaw, pitch);
-                sql.syncExecuteUpdate("INSERT INTO angles VALUES(?, ?, ?, ?)", yaw, pitch, time, nick);
+                angleCache.put(nick, new LastWritenAngle(yaw, pitch));
+                sql.syncExecuteUpdate(
+                    "INSERT INTO angles VALUES(?, ?, ?, ?)", yaw, pitch, time, findOrCreatePlayerIndex(nick)
+                );
             }
 
             
@@ -126,6 +143,7 @@ public class IpTracker extends JavaPlugin implements Listener {
     @EventHandler
     void onLeave(PlayerQuitEvent event) {
         insertConnectionAction("quit", event);
+        angleCache.remove(event.getPlayer().getName());
     }
 
     @EventHandler
@@ -235,8 +253,19 @@ public class IpTracker extends JavaPlugin implements Listener {
             "    yaw INTEGER," +
             "    pitch INTEGER," +
             "    time INTEGER,"  +
-            "    nick STRING" +
+            "    player_id INTEGER" +
             ")"
+        );
+
+        sql.execute(
+            "CREATE TABLE IF NOT EXISTS players(" +
+            "     id INTEGER PRIMARY KEY AUTOINCREMENT ," +
+            "     nick STRING" +
+            ")"
+        );
+
+        sql.execute(
+            "CREATE INDEX IF NOT EXISTS idx_contacts_email ON players (nick)"
         );
     }
 
